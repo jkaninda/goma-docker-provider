@@ -233,14 +233,18 @@ gateway:
 
   log:
     level: info
-
+  providers:
+    file:
+      enabled: true
+      directory: /etc/goma/routes.d
+      watch: true
   monitoring:
     enableMetrics: true
     enableLiveness: true
 
-  extraConfig:
-    directory: /etc/goma/extra
-    watch: true
+  # extraConfig:
+  #   directory: /etc/goma/extra
+  #   watch: true
 
   routes: []
 
@@ -277,7 +281,7 @@ services:
     image: jkaninda/goma-docker-provider
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./config/extra:/etc/goma/routes.d
+      - ./config/routes.d:/etc/goma/routes.d
     environment:
       - GOMA_OUTPUT_DIR=/etc/goma/routes.d
       - GOMA_POLL_INTERVAL=10s
@@ -293,45 +297,41 @@ services:
     networks: [goma-net]
 ```
 
----
 
-Good call — this is an **important requirement** and should be explicit in the README.
-Here’s a **clean, copy-pasteable section** you can add, plus where it fits best.
-
----
 
 ## Required Goma Gateway Configuration
 
-⚠️ **Important:**
-The Goma Docker Provider **requires Goma Gateway to load external configurations** and **watch for changes** in order to automatically apply routes generated from Docker labels.
+The Goma Docker Provider **only generates route files**.
+For these routes to be **loaded and applied**, **Goma Gateway must be configured to read and watch the generated directory**.
 
-You **must** enable `extraConfig` in Goma Gateway and set `watch: true`.
+You must configure **ONE (and only one)** of the following options:
 
-### Why this is required
+* **Extra Config** (simple, legacy-compatible)
+* **File Provider** (recommended)
 
-* The Docker Provider generates route files dynamically
-* Routes are written to the configured output directory (e.g. `/etc/goma/routes.d`)
-* Goma Gateway must:
+### Option 1: Extra Config (Simple)
 
-  * Load routes from that directory
-  * Watch for file changes to apply updates without restart
-
-Without this configuration:
-
-* Routes will be generated **but not loaded**
-* Updates will not be synced automatically
-
----
-
-### Required Configuration
-
-Add the following to your **Goma Gateway config file** (`goma.yml`):
+Use this option if you want a minimal setup.
 
 ```yaml
 extraConfig:
-  directory: /etc/goma/extra
+  directory: /etc/goma/routes.d
   watch: true
 ```
+
+
+### Option 2: File Provider (Recommended)
+
+This is the **preferred approach**, especially when using multiple providers.
+
+```yaml
+providers:
+  file:
+    enabled: true
+    directory: /etc/goma/routes.d
+    watch: true
+```
+
 ---
 
 ## License

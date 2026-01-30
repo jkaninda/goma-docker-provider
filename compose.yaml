@@ -13,7 +13,7 @@ services:
     image: jkaninda/goma-docker-provider
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # Required
-      - ./config/extra:/etc/goma/routes.d
+      - ./config/routes.d:/etc/goma/routes.d
     environment:
       - GOMA_OUTPUT_DIR=/etc/goma/routes.d # Optional, default /etc/goma/routes.d
       - GOMA_POLL_INTERVAL=10s # Optional, default 10s
