@@ -1,0 +1,51 @@
+version: "2"
+gateway:
+    entryPoints:
+      web:
+        address: ":80"
+      webSecure:
+        address: ":443"
+    log:
+      level: info
+    monitoring:
+        enableMetrics: true
+        enableLiveness: true
+    # Enable external config loads and auto reload
+    extraConfig:
+        directory: /etc/goma/extra
+        watch: true
+    routes: []
+middlewares:
+    - name: basic-auth
+      type: basicAuth
+      paths:
+        - /.*
+      rule:
+        realm: Restricted
+        forwardUsername: false
+        users:
+            - username: admin
+              password: $2y$05$TIx7l8sJWvMFXw4n0GbkQuOhemPQOormacQC4W1p28TOVzJtx.XpO
+            - username: user
+              password: password
+    - name: block-access
+      type: access
+      paths:
+        - /docs/.*
+        - /actuator/.*
+    - name: block-admin-access
+      type: access
+      paths:
+        - /admin/.*
+      rule:
+        statusCode: 404
+    - name: access-policy
+      type: accessPolicy
+      rule:
+        action: DENY
+        sourceRanges:
+            - 10.1.10.0/16
+            - 192.168.1.25-192.168.1.100
+            - 192.168.1.115
+certManager:
+    provider: acme
