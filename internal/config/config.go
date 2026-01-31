@@ -37,7 +37,6 @@ type Config struct {
 	PollInterval time.Duration
 	DockerHost   string
 	EnableSwarm  bool
-	SwarmNetwork string
 }
 
 func init() {
@@ -50,10 +49,9 @@ func New() *Config {
 		interval = 10 * time.Second
 	}
 	return &Config{
-		OutputDir:    goutils.Env("GOMA_OUTPUT_DIR", "/etc/goma/routes.d"),
+		OutputDir:    goutils.Env("GOMA_OUTPUT_DIR", "/etc/goma/providers"),
 		PollInterval: interval,
 		EnableSwarm:  goutils.EnvBool("GOMA_ENABLE_SWARM", false),
-		SwarmNetwork: goutils.Env("GOMA_SWARM_NETWORK", "goma-net"),
 	}
 
 }

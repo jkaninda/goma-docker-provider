@@ -12,14 +12,14 @@ gateway:
   providers:
     file:
       enabled: true
-      directory: /etc/goma/routes.d
+      directory: /etc/goma/providers
       watch: true
   monitoring:
     enableMetrics: true
     enableLiveness: true
 
   # extraConfig:
-  #   directory: /etc/goma/extra
+  #   directory: /etc/goma/providers
   #   watch: true
 
   routes: []

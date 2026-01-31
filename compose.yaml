@@ -9,14 +9,13 @@ services:
     networks:
       - goma-net
 
-  goma-docker-provider:
+  goma-provider:
     image: jkaninda/goma-docker-provider
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # Required
-      - ./config/routes.d:/etc/goma/routes.d
+      - ./config/providers:/etc/goma/providers
     environment:
-      - GOMA_OUTPUT_DIR=/etc/goma/routes.d # Optional, default /etc/goma/routes.d
-      - GOMA_POLL_INTERVAL=10s # Optional, default 10s
+      - GOMA_OUTPUT_DIR=/etc/goma/providers # Optional, default /etc/goma/providers
       - GOMA_ENABLE_SWARM=false # Enable Swarm mode, default false
     networks:
       - goma-net
@@ -30,6 +29,7 @@ services:
       - "goma.name=api-example"
       - "goma.path=/"
       - "goma.port=8080"
+      - "goma.scheme=http"
       - "goma.rewrite=/"
       - "goma.priority=100"
       
@@ -54,7 +54,7 @@ services:
       - "goma.middlewares=basic-auth,rate-limit,cors"
       
       # Metrics
-      - "goma.disableMetrics=false"
+      - "goma.disable_metrics=false"
     networks:
       - goma-net
 

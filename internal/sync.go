@@ -48,7 +48,7 @@ import (
 var (
 	// goma.routes.{routeName}.{field}
 	namedRoutePattern = regexp.MustCompile(`^goma\.routes\.([^.]+)\.(.+)$`)
-	outputFile        = "goma-docker-routes.yaml"
+	outputFile        = "goma-docker-provider.yaml"
 )
 
 func (p *Provider) syncConfiguration(ctx context.Context) error {
@@ -247,7 +247,11 @@ func (p *Provider) parseNamedContainerRoute(labels map[string]string, routeName,
 
 	// Build target URL
 	port := getRouteLabel(routeLabels, "port", "80")
-	route.Target = fmt.Sprintf("http://%s:%s", containerName, port)
+	scheme := getLabel(labels, "goma.scheme", "http")
+	if scheme != "http" && scheme != "https" {
+		scheme = "http"
+	}
+	route.Target = fmt.Sprintf("%s://%s:%s", scheme, containerName, port)
 
 	// Parse all route fields
 	p.parseRouteFields(route, routeLabels)
@@ -289,7 +293,11 @@ func (p *Provider) parseNamedServiceRoute(service swarm.Service, labels map[stri
 	}
 
 	// Swarm mode, use service name as DNS
-	route.Target = fmt.Sprintf("http://%s:%s", serviceName, port)
+	scheme := getLabel(labels, "goma.scheme", "http")
+	if scheme != "http" && scheme != "https" {
+		scheme = "http"
+	}
+	route.Target = fmt.Sprintf("%s://%s:%s", scheme, serviceName, port)
 
 	// Parse all route fields
 	p.parseRouteFields(route, routeLabels)
@@ -310,7 +318,11 @@ func (p *Provider) parseSingleContainerRoute(labels map[string]string, container
 	}
 
 	port := getLabel(labels, "goma.port", "80")
-	route.Target = fmt.Sprintf("http://%s:%s", containerName, port)
+	scheme := getLabel(labels, "goma.scheme", "http")
+	if scheme != "http" && scheme != "https" {
+		scheme = "http"
+	}
+	route.Target = fmt.Sprintf("%s://%s:%s", scheme, containerName, port)
 
 	p.parseRouteLabels(route, labels)
 
@@ -337,8 +349,11 @@ func (p *Provider) parseSingleServiceRoute(service swarm.Service, labels map[str
 	if port == "" {
 		port = "80"
 	}
-
-	route.Target = fmt.Sprintf("http://%s:%s", serviceName, port)
+	scheme := getLabel(labels, "goma.scheme", "http")
+	if scheme != "http" && scheme != "https" {
+		scheme = "http"
+	}
+	route.Target = fmt.Sprintf("%s://%s:%s", scheme, serviceName, port)
 
 	// Parse labels
 	p.parseRouteLabels(route, labels)
