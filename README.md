@@ -11,11 +11,11 @@ It’s ideal for **Docker-based** and **Docker Compose** deployments where servi
 
 The provider:
 
-* Scans running containers for the label `goma.enable=true`
-* Converts container labels into **Goma Gateway routes**
-* Writes the generated routes to a YAML file
-* Supports **single-route** and **multi-route** containers
-* Periodically polls Docker to keep routes in sync
+- Scans running containers for the label `goma.enable=true`
+- Converts container labels into **Goma Gateway routes**
+- Writes the generated routes to a YAML file
+- Supports **single-route** and **multi-route** containers
+- Periodically polls Docker to keep routes in sync
 
 ## Startup Flow & Configuration Sync
 
@@ -27,7 +27,7 @@ This diagram shows how **Goma Gateway**, **Goma Docker Provider**, and **Docker 
 flowchart LR
     A[Docker Engine] -->|List containers & labels| B[Goma Docker Provider]
 
-    B -->|Generate route YAML| C[/Routes Directory<br/>/etc/goma/routes.d/]
+    B -->|Generate route YAML| C[/Routes Directory<br/>/etc/goma/providers/]
 
     C -->|Watch & load routes| D[Goma Gateway]
 
@@ -49,19 +49,33 @@ flowchart LR
 - **Gateway**: [Goma Gateway on GitHub](https://github.com/jkaninda/goma-gateway)
 - **Source Code**: [goma-docker-provider](https://github.com/jkaninda/goma-docker-provider)
 - **Docker Image**: [jkaninda/goma-docker-provider](https://hub.docker.com/r/jkaninda/goma-docker-provider)
+
 ---
 
 ### Defaults
 
-| Setting          | Default                   |
-| ---------------- | ------------------------- |
-| Output file      | `goma-docker-routes.yaml` |
-| Output directory | `/etc/goma/routes.d`      |
-| Poll interval    | `10s`                     |
+| Setting          | Default                     |
+| ---------------- | --------------------------- |
+| Output file      | `goma-docker-provider.yaml` |
+| Output directory | `/etc/goma/providers`       |
+| Poll interval    | `10s`                       |
 
 All defaults can be overridden via environment variables.
 
 ---
+
+## Minimal Configuration
+
+```yaml
+services:
+  api-service:
+    image: your-api:latest
+    labels:
+      # Core
+      - "goma.enable=true"
+      - "goma.port=8000"
+      - "goma.hosts=api.example.com,api.local"
+```
 
 ## Single-Route Configuration (Basic)
 
@@ -77,7 +91,7 @@ services:
       - "goma.name=api"
       - "goma.path=/api"
       - "goma.port=8000"
-      - "goma.rewrite=/"          # Rewrite /api → /
+      - "goma.rewrite=/" # Rewrite /api → /
       - "goma.priority=100"
 
       # Hosts & Methods
@@ -147,6 +161,7 @@ services:
 | `goma.name`     | Route name             | `api`   |
 | `goma.path`     | Public route path      | `/api`  |
 | `goma.port`     | Container port         | `8080`  |
+| `goma.scheme`   | Container scheme       | `http`  |
 | `goma.rewrite`  | Rewrite path           | `/`     |
 | `goma.priority` | Route priority         | `100`   |
 | `goma.enabled`  | Enable/disable route   | `true`  |
@@ -207,11 +222,11 @@ services:
 
 ## Environment Variables
 
-| Variable             | Description                 | Default              |
-| -------------------- | --------------------------- | -------------------- |
-| `GOMA_OUTPUT_DIR`    | Output directory for routes | `/etc/goma/routes.d` |
-| `GOMA_POLL_INTERVAL` | Docker polling interval     | `10s`                |
-| `GOMA_ENABLE_SWARM`  | Enable Docker Swarm mode    | `false`              |
+| Variable             | Description                 | Default               |
+| -------------------- | --------------------------- | --------------------- |
+| `GOMA_OUTPUT_DIR`    | Output directory for routes | `/etc/goma/providers` |
+| `GOMA_POLL_INTERVAL` | Docker polling interval     | `10s`                 |
+| `GOMA_ENABLE_SWARM`  | Enable Docker Swarm mode    | `false`               |
 
 ---
 
@@ -236,7 +251,7 @@ gateway:
   providers:
     file:
       enabled: true
-      directory: /etc/goma/routes.d
+      directory: /etc/goma/providers
       watch: true
   monitoring:
     enableMetrics: true
@@ -277,14 +292,13 @@ services:
       - ./config:/etc/goma
     networks: [goma-net]
 
-  goma-docker-provider:
+  goma-provider:
     image: jkaninda/goma-docker-provider
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./config/routes.d:/etc/goma/routes.d
+      - ./config/providers:/etc/goma/rproviders
     environment:
-      - GOMA_OUTPUT_DIR=/etc/goma/routes.d
-      - GOMA_POLL_INTERVAL=10s
+      - GOMA_OUTPUT_DIR=/etc/goma/providers
       - GOMA_ENABLE_SWARM=false
   web-service:
     image: jkaninda/okapi-example
@@ -297,8 +311,6 @@ services:
     networks: [goma-net]
 ```
 
-
-
 ## Required Goma Gateway Configuration
 
 The Goma Docker Provider **only generates route files**.
@@ -306,8 +318,8 @@ For these routes to be **loaded and applied**, **Goma Gateway must be configured
 
 You must configure **ONE (and only one)** of the following options:
 
-* **Extra Config** (simple, legacy-compatible)
-* **File Provider** (recommended)
+- **Extra Config** (simple, legacy-compatible)
+- **File Provider** (recommended)
 
 ### Option 1: Extra Config (Simple)
 
@@ -315,10 +327,9 @@ Use this option if you want a minimal setup.
 
 ```yaml
 extraConfig:
-  directory: /etc/goma/routes.d
+  directory: /etc/goma/providers
   watch: true
 ```
-
 
 ### Option 2: File Provider (Recommended)
 
@@ -328,7 +339,7 @@ This is the **preferred approach**, especially when using multiple providers.
 providers:
   file:
     enabled: true
-    directory: /etc/goma/routes.d
+    directory: /etc/goma/providers
     watch: true
 ```
 
@@ -343,4 +354,3 @@ MIT License — free to use, modify, and distribute.
 ## © Copyright
 
 © 2026 — **Jonas Kaninda**
-
