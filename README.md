@@ -213,6 +213,7 @@ services:
 | ----------------------------------- | ---------------- |
 | `goma.routes.{name}.path`           | Route path       |
 | `goma.routes.{name}.port`           | Route port       |
+| `goma.routes.{name}.scheme`         | Route scheme     |
 | `goma.routes.{name}.methods`        | Allowed methods  |
 | `goma.routes.{name}.hosts`          | Hosts            |
 | `goma.routes.{name}.health_check.*` | Health check     |
@@ -258,7 +259,7 @@ gateway:
     enableLiveness: true
 
   # extraConfig:
-  #   directory: /etc/goma/extra
+  #   directory: /etc/goma/providers
   #   watch: true
 
   routes: []
