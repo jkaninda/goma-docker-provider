@@ -5,7 +5,11 @@ It automatically discovers Docker containers via labels and generates **Goma Gat
 
 It’s ideal for **Docker-based** and **Docker Compose** deployments where services should self-register routes declaratively.
 
----
+[![Build](https://github.com/jkaninda/goma-docker-provider/actions/workflows/release.yaml/badge.svg)](https://github.com/jkaninda/goma-docker-provider/actions/workflows/release.yaml)
+[![Go Report](https://goreportcard.com/badge/github.com/jkaninda/goma-docker-provider)](https://goreportcard.com/report/github.com/jkaninda/goma-docker-provider)
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/jkaninda/goma-docker-provider?style=flat-square)
+![Docker Pulls](https://img.shields.io/docker/pulls/jkaninda/goma-docker-provider?style=flat-square)
+
 
 ## How It Works
 
