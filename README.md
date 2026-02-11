@@ -295,16 +295,22 @@ services:
       - "443:443"
     volumes:
       - ./config:/etc/goma
-    networks: [goma-net]
+      - providers:/etc/goma/providers
+    networks:
+      - goma-net
 
   goma-provider:
     image: jkaninda/goma-docker-provider
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./config/providers:/etc/goma/rproviders
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Required
+      - providers:/etc/goma/providers
     environment:
-      - GOMA_OUTPUT_DIR=/etc/goma/providers
-      - GOMA_ENABLE_SWARM=false
+      - GOMA_OUTPUT_DIR=/etc/goma/providers # Optional, default /etc/goma/providers
+      - GOMA_ENABLE_SWARM=false # Enable Swarm mode, default false
+    networks:
+      - goma-net
+
+  # Web Service - Minimal Configuration
   web-service:
     image: jkaninda/okapi-example
     labels:
@@ -313,7 +319,11 @@ services:
       - "goma.hosts=example.com, www.example.com"
     networks:
       - goma-net
-    networks: [goma-net]
+volumes:
+  providers: {}
+networks:
+  goma-net:
+    driver: bridge
 ```
 
 ## Required Goma Gateway Configuration
